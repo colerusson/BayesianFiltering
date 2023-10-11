@@ -1,14 +1,17 @@
 package Robot;
 
 import javax.swing.*;
-import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Socket;
+import java.awt.event.*;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.lang.*;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import java.io.*;
+import java.util.Random;
+import java.util.Scanner;
+import java.net.*;
 
 
 // This class draws the probability map and value iteration map that you create to the window
