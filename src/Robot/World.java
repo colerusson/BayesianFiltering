@@ -10,7 +10,7 @@ public class World {
 
     World(String worldFile) {
         try {
-            FileReader fileReader = new FileReader("../Mundos/" + worldFile);
+            FileReader fileReader = new FileReader("C:\\Users\\coler\\Documents\\BYU Fall 2023\\CS 470\\BayesianFiltering\\src\\Mundos\\" + worldFile);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             
             width = Integer.parseInt(bufferedReader.readLine());
