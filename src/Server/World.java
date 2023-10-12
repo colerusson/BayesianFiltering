@@ -1,14 +1,8 @@
 package Server;
 
-import java.awt.*;
-import java.util.*;
-import java.awt.event.*;
-import java.lang.*;
-import java.io.*;
-import java.net.*;
-import javax.swing.*;
-import java.math.*;
-import java.text.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
 public class World {
     int width, height;
@@ -16,7 +10,7 @@ public class World {
 
     World(String worldFile) {
         try {
-            FileReader fileReader = new FileReader("../Mundos/" + worldFile);
+            FileReader fileReader = new FileReader("C:\\Users\\coler\\Documents\\BYU Fall 2023\\CS 470\\BayesianFiltering\\src\\Mundos\\" + worldFile);
             BufferedReader bufferedReader = new BufferedReader(fileReader);
             
             width = Integer.parseInt(bufferedReader.readLine());

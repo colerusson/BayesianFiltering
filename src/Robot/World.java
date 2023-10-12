@@ -1,14 +1,8 @@
 package Robot;
 
-import java.awt.*;
-import java.util.*;
-import java.awt.event.*;
-import java.lang.*;
-import java.io.*;
-import java.net.*;
-import javax.swing.*;
-import java.math.*;
-import java.text.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
 public class World {
     int width, height;  // the number of grid squares in the x and y directions
