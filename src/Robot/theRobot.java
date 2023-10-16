@@ -405,61 +405,119 @@ public class theRobot extends JFrame {
     // Note: sonars is a bit string with four characters, specifying the sonar reading in the direction of North, South, East, and West
     //       For example, the sonar string 1001, specifies that the sonars found a wall in the North and West directions, but not in the South and East directions
     void updateProbabilities(int action, String sonars) {
-        // use discrete bayes filter algorithm to update the probabilities of where the AI thinks it is
+        double moveProb = this.moveProb;
+        double sensorAccuracy = this.sensorAccuracy;
         double[][] newProbs = new double[mundo.width][mundo.height];
-        double totalProbability = 0.0;
 
-        // Loop through all possible positions in the world
         for (int y = 0; y < mundo.height; y++) {
             for (int x = 0; x < mundo.width; x++) {
-                double prior = 0.0;
+                // Check if the robot is in a wall, stairwell, or the goal
+                if (mundo.grid[x][y] != 0) {
+                    newProbs[x][y] = 0.0;
+                    continue;
+                }
 
-                // Calculate the prior probability based on the action (motion model)
-                if (action == STAY) {
-                    prior = moveProb * probs[x][y] + (1 - moveProb) * (1.0 / (mundo.width * mundo.height));
-                } else {
-                    // Implement the motion model based on the chosen action (NORTH, SOUTH, EAST, WEST)
-                    // Adjust 'x' and 'y' based on the chosen action
-                    int newX = x;
-                    int newY = y;
-                    if (action == NORTH) {
-                        newY = Math.max(0, y - 1);
-                    } else if (action == SOUTH) {
-                        newY = Math.min(mundo.height - 1, y + 1);
-                    } else if (action == WEST) {
-                        newX = Math.max(0, x - 1);
-                    } else if (action == EAST) {
-                        newX = Math.min(mundo.width - 1, x + 1);
+                // Check if the robot is in the goal
+                if (mundo.grid[x][y] == 3) {
+                    newProbs[x][y] = 0.0;
+                    continue;
+                }
+
+                // Check if the robot is in a stairwell
+                if (mundo.grid[x][y] == 2) {
+                    newProbs[x][y] = 0.0;
+                    continue;
+                }
+
+                if (action == NORTH) {
+                    for (int i = 0; i < sonars.length(); i++) {
+                        if (sonars.charAt(i) == '0') {
+                            newProbs[x][y] += probs[x][y] * moveProb * sensorAccuracy;
+                        }
                     }
-                    prior = moveProb * probs[newX][newY] + (1 - moveProb) * (1.0 / (mundo.width * mundo.height));
+
+                    if (y > 0) {
+                        newProbs[x][y+1] += probs[x][y] * moveProb * (1 - sensorAccuracy);
+                    }
+                    else {
+                        newProbs[x][y] += probs[x][y] * moveProb * (1 - sensorAccuracy);
+                    }
                 }
 
-                // Calculate the likelihood (sensor model)
-                char sonar = 0;
-                if (sonars.length() == mundo.width * mundo.height) {
-                    sonar = sonars.charAt(x + y * mundo.width);
-                    // The rest of your updateProbabilities logic
-                } else {
-                    // Handle the case when sonars has an unexpected length
-                    System.err.println("Invalid sonars length: " + sonars.length());
-                    // Add error handling or return gracefully as needed
-                }
-                double likelihood = (sonar == '0') ? sensorAccuracy : (1 - sensorAccuracy);
+                if (action == SOUTH) {
+                    for (int i = 0; i < sonars.length(); i++) {
+                        if (sonars.charAt(i) == '0') {
+                            newProbs[x][y] += probs[x][y] * moveProb * sensorAccuracy;
+                        }
+                    }
 
-                // Calculate the new probability using Bayes' theorem
-                newProbs[x][y] = likelihood * prior;
-                totalProbability += newProbs[x][y];
+                    if (y < mundo.height - 1) {
+                        newProbs[x][y-1] += probs[x][y] * moveProb * (1 - sensorAccuracy);
+                    }
+                    else {
+                        newProbs[x][y] += probs[x][y] * moveProb * (1 - sensorAccuracy);
+                    }
+                }
+
+                if (action == EAST) {
+                    for (int i = 0; i < sonars.length(); i++) {
+                        if (sonars.charAt(i) == '0') {
+                            newProbs[x][y] += probs[x][y] * moveProb * sensorAccuracy;
+                        }
+                    }
+
+                    if (x < mundo.width - 1) {
+                        newProbs[x+1][y] += probs[x][y] * moveProb * (1 - sensorAccuracy);
+                    }
+                    else {
+                        newProbs[x][y] += probs[x][y] * moveProb * (1 - sensorAccuracy);
+                    }
+                }
+
+                if (action == WEST) {
+                    for (int i = 0; i < sonars.length(); i++) {
+                        if (sonars.charAt(i) == '0') {
+                            newProbs[x][y] += probs[x][y] * moveProb * sensorAccuracy;
+                        }
+                    }
+
+                    if (x > 0) {
+                        newProbs[x-1][y] += probs[x][y] * moveProb * (1 - sensorAccuracy);
+                    }
+                    else {
+                        newProbs[x][y] += probs[x][y] * moveProb * (1 - sensorAccuracy);
+                    }
+                }
+
+                if (action == STAY) {
+                    for (int i = 0; i < sonars.length(); i++) {
+                        if (sonars.charAt(i) == '0') {
+                            newProbs[x][y] += probs[x][y] * moveProb * sensorAccuracy;
+                        }
+                    }
+
+                    newProbs[x][y] += probs[x][y] * moveProb * (1 - sensorAccuracy);
+                }
             }
         }
 
-        // Normalize the probabilities to ensure they sum to 1
+        // Normalize the probabilities
+        double sumOfProbs = 0.0;
         for (int y = 0; y < mundo.height; y++) {
             for (int x = 0; x < mundo.width; x++) {
-                newProbs[x][y] /= totalProbability;
+                sumOfProbs += newProbs[x][y];
             }
         }
+
+        for (int y = 0; y < mundo.height; y++) {
+            for (int x = 0; x < mundo.width; x++) {
+                newProbs[x][y] /= sumOfProbs;
+            }
+        }
+
+        // Update the probabilities
         probs = newProbs;
-        myMaps.updateProbs(probs); // call this function to update the GUI with your new probabilities
+        myMaps.updateProbs(probs);
     }
     
     // This is the function you'd need to write to make the robot move using your AI;
@@ -507,6 +565,7 @@ public class theRobot extends JFrame {
                     // here, you'll want to update the position probabilities
                     // since you know that the result of the move as that the robot
                     // was not at the goal or in a stairwell
+                    updateProbabilities(action, sonars);
                 }
                 Thread.sleep(decisionDelay);  // delay that is useful to see what is happening when the AI selects actions
                                               // decisionDelay is specified by the send command-line argument, which is given in milliseconds
