@@ -437,18 +437,18 @@ public class theRobot extends JFrame {
                 }
 
                 // sensor model
-//                for (int i = 0; i < 4; i++) {
-//                    char sonarReading = sonars.charAt(i);
-//                    // Calculate the sonar probability based on the sensor model
-//                    double sonarProbability = (sonarReading == '1') ? sensorAccuracy : (1 - sensorAccuracy);
-//
-//                    // Update the probabilities with the sonar model
-//                    int[] sonarPosition = getPosition(x, y, i);
-//                    int sonarX = sonarPosition[0];
-//                    int sonarY = sonarPosition[1];
-//
-//                    newProbs[sonarX][sonarY] += sonarProbability * probs[x][y];
-//                }
+                for (int i = 0; i < 4; i++) {
+                    char sonarReading = sonars.charAt(i);
+                    // Calculate the sonar probability based on the sensor model
+                    double sonarProbability = (sonarReading == '1') ? sensorAccuracy : (1 - sensorAccuracy);
+
+                    // Update the probabilities with the sonar model
+                    int[] sonarPosition = getPosition(x, y, i);
+                    int sonarX = sonarPosition[0];
+                    int sonarY = sonarPosition[1];
+
+                    newProbs[sonarX][sonarY] += sonarProbability * probs[x][y];
+                }
             }
         }
 
