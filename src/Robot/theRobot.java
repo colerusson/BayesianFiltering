@@ -409,95 +409,46 @@ public class theRobot extends JFrame {
         double sensorAccuracy = this.sensorAccuracy;
         double[][] newProbs = new double[mundo.width][mundo.height];
 
+        // Iterate through all positions in the maze
         for (int y = 0; y < mundo.height; y++) {
             for (int x = 0; x < mundo.width; x++) {
-                // Check if the robot is in a wall, stairwell, or the goal
-                if (mundo.grid[x][y] != 0) {
-                    newProbs[x][y] = 0.0;
+                // Skip updating probabilities for wall positions
+                if (mundo.grid[x][y] == 1) {
+                    newProbs[x][y] = 0.0; // Wall positions have zero probability
                     continue;
                 }
 
-                // Check if the robot is in the goal
-                if (mundo.grid[x][y] == 3) {
-                    newProbs[x][y] = 0.0;
-                    continue;
+                // Iterate over all direction
+                for (int moveDirection = 0; moveDirection < 5; moveDirection++) {
+                    int[] movePosition = getPosition(x, y, moveDirection);
+                    int moveX = movePosition[0]; // position of x if not a wall
+                    int moveY = movePosition[1]; // position of y if not a wall
+
+                    // Calculate move probability based on the transition model
+                    double moveProbability;
+                    if (moveDirection == action) {
+                        moveProbability = moveProb;
+                    } else {
+                        moveProbability = (1 - moveProb) / 4;
+                    }
+
+                    // Accumulate probabilities considering the current move action
+                    newProbs[moveX][moveY] += moveProbability * probs[x][y];
                 }
 
-                // Check if the robot is in a stairwell
-                if (mundo.grid[x][y] == 2) {
-                    newProbs[x][y] = 0.0;
-                    continue;
-                }
-
-                if (action == NORTH) {
-                    for (int i = 0; i < sonars.length(); i++) {
-                        if (sonars.charAt(i) == '0') {
-                            newProbs[x][y] += probs[x][y] * moveProb * sensorAccuracy;
-                        }
-                    }
-
-                    if (y > 0) {
-                        newProbs[x][y+1] += probs[x][y] * moveProb * (1 - sensorAccuracy);
-                    }
-                    else {
-                        newProbs[x][y] += probs[x][y] * moveProb * (1 - sensorAccuracy);
-                    }
-                }
-
-                if (action == SOUTH) {
-                    for (int i = 0; i < sonars.length(); i++) {
-                        if (sonars.charAt(i) == '0') {
-                            newProbs[x][y] += probs[x][y] * moveProb * sensorAccuracy;
-                        }
-                    }
-
-                    if (y < mundo.height - 1) {
-                        newProbs[x][y-1] += probs[x][y] * moveProb * (1 - sensorAccuracy);
-                    }
-                    else {
-                        newProbs[x][y] += probs[x][y] * moveProb * (1 - sensorAccuracy);
-                    }
-                }
-
-                if (action == EAST) {
-                    for (int i = 0; i < sonars.length(); i++) {
-                        if (sonars.charAt(i) == '0') {
-                            newProbs[x][y] += probs[x][y] * moveProb * sensorAccuracy;
-                        }
-                    }
-
-                    if (x < mundo.width - 1) {
-                        newProbs[x+1][y] += probs[x][y] * moveProb * (1 - sensorAccuracy);
-                    }
-                    else {
-                        newProbs[x][y] += probs[x][y] * moveProb * (1 - sensorAccuracy);
-                    }
-                }
-
-                if (action == WEST) {
-                    for (int i = 0; i < sonars.length(); i++) {
-                        if (sonars.charAt(i) == '0') {
-                            newProbs[x][y] += probs[x][y] * moveProb * sensorAccuracy;
-                        }
-                    }
-
-                    if (x > 0) {
-                        newProbs[x-1][y] += probs[x][y] * moveProb * (1 - sensorAccuracy);
-                    }
-                    else {
-                        newProbs[x][y] += probs[x][y] * moveProb * (1 - sensorAccuracy);
-                    }
-                }
-
-                if (action == STAY) {
-                    for (int i = 0; i < sonars.length(); i++) {
-                        if (sonars.charAt(i) == '0') {
-                            newProbs[x][y] += probs[x][y] * moveProb * sensorAccuracy;
-                        }
-                    }
-
-                    newProbs[x][y] += probs[x][y] * moveProb * (1 - sensorAccuracy);
-                }
+                // sensor model
+//                for (int i = 0; i < 4; i++) {
+//                    char sonarReading = sonars.charAt(i);
+//                    // Calculate the sonar probability based on the sensor model
+//                    double sonarProbability = (sonarReading == '1') ? sensorAccuracy : (1 - sensorAccuracy);
+//
+//                    // Update the probabilities with the sonar model
+//                    int[] sonarPosition = getPosition(x, y, i);
+//                    int sonarX = sonarPosition[0];
+//                    int sonarY = sonarPosition[1];
+//
+//                    newProbs[sonarX][sonarY] += sonarProbability * probs[x][y];
+//                }
             }
         }
 
@@ -519,7 +470,30 @@ public class theRobot extends JFrame {
         probs = newProbs;
         myMaps.updateProbs(probs);
     }
-    
+
+    private int[] getPosition(int x, int y, int moveAction) {
+        int[] newPosition = new int[2];
+
+        if (moveAction == NORTH) {
+            newPosition[0] = x;
+            newPosition[1] = y - 1;
+        } else if (moveAction == SOUTH) {
+            newPosition[0] = x;
+            newPosition[1] = y + 1;
+        } else if (moveAction == EAST) {
+            newPosition[0] = x + 1;
+            newPosition[1] = y;
+        } else if (moveAction == WEST) {
+            newPosition[0] = x - 1;
+            newPosition[1] = y;
+        } else if (moveAction == STAY) {
+            newPosition[0] = x;
+            newPosition[1] = y;
+        }
+
+        return newPosition;
+    }
+
     // This is the function you'd need to write to make the robot move using your AI;
     // You do NOT need to write this function for this lab; it can remain as is
     int automaticAction() {
@@ -565,7 +539,7 @@ public class theRobot extends JFrame {
                     // here, you'll want to update the position probabilities
                     // since you know that the result of the move as that the robot
                     // was not at the goal or in a stairwell
-                    updateProbabilities(action, sonars);
+                    ///updateProbabilities(action, sonars);
                 }
                 Thread.sleep(decisionDelay);  // delay that is useful to see what is happening when the AI selects actions
                                               // decisionDelay is specified by the send command-line argument, which is given in milliseconds
